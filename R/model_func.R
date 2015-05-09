@@ -4,6 +4,10 @@ results
 }#new environment hosted each time function is called
 
 
+launcher <- function(script, dataset, par){
+  lapply(par, function(m) domino.run(script, dataset, m))
+}
+
 compare <- function(dataset, par, metric){
   result <- lapply(par, loadResults, dataset=dataset)
   result <- do.call(rbind, result)

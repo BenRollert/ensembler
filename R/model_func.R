@@ -1,7 +1,14 @@
+#' Load 'results' object from an .Rda file; can assign output to a variable.
+#' 
+#' @param dataset A character string specifying the dataset associated with the desired results object.
+#' @param par A character string specifying the parameter or model associated with the desired results object.
+#' @return The 'results' slot from a caret train object.
+#' @examples
+#' results <- loadResults("BreastCancer", "nnet")
 loadResults <- function(dataset, par){
 load(sprintf("results_%s_%s.Rda", dataset, par))
 results
-}#new environment hosted each time function is called
+}
 
 
 launcher <- function(script, dataset, par){
@@ -106,7 +113,6 @@ topComb <- function(ordered_acc, pred_mat, reference){
  }
 
 aucFun <- function(pred, reference) {
-require(ROCR)
 pred <- prediction(pred, reference)
 perf <- performance(pred, "tpr", "fpr")
 plot(perf)

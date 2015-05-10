@@ -112,12 +112,21 @@ topComb <- function(ordered_acc, pred_mat, reference){
   top_m
  }
 
+#' Calculate the error under the receiver operator curve and plot the ROC, given a vector of predicitons and a reference vector.
+#' 
+#' @param pred The name of the prediction vector.
+#' @param reference The name of the reference vector.
+#' @return Area under the receiver operator curve. Also plots the ROC as a side effect. 
+#' @examples
+#' AUC <- aucFun(pred, reference)
 aucFun <- function(pred, reference) {
-pred <- prediction(pred, reference)
-perf <- performance(pred, "tpr", "fpr")
-plot(perf)
-auc.tmp <- performance(pred, "auc")
-auc <- as.numeric(auc.tmp@y.values)
-print(auc)}
+  pred <- prediction(pred, reference)
+  perf <- performance(pred, "tpr", "fpr")
+  plot(perf)
+  auc.tmp <- performance(pred, "auc")
+  auc <- as.numeric(auc.tmp@y.values)
+  print(auc)}
+
+
 
 

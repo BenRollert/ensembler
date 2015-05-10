@@ -1,9 +1,19 @@
 Package: ensembler
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Build Ensemble Methods With Domino Datalab's Cloud Infrastructure
+Version: 0.1
 Date: 2015-05-09
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Benjamin Paul Rollert
+Maintainer: Benjamin Paul Rollert <benjamin.rollert@gmail.com>
+Description: Domino Datalab (www.dominoup.com) offers R users a 
+  way to programmatically trigger runs on cloud-hosted infrastructure with its package, domino. 
+  ensemlber extends domino's functionality by integrating with the well-known caret package to enable
+  users to train models on seperate AWS instances in the cloud. ensembler also offers a clean interface for downloading and combining 
+  Rdata files from Domino. 
+License: MIT
+Imports:
+  domino,
+  caret,
+  mlbench
+
+

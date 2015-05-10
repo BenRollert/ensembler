@@ -15,13 +15,6 @@ compare <- function(dataset, par, metric){
 }
 
 
-load_predict <- function(dataset, method, newdata, outcome, type){
-  load(sprintf("model_obj_%s_%s.Rda", dataset, method))
-  out <- predict(model, newdata=newdata, type=type)
-  out[,outcome]
-}
-
-
 load_models <- function(dataset, method){
   load(sprintf("model_obj_%s_%s.Rda", dataset, method))
   model
@@ -66,21 +59,8 @@ print(lapply(models, featureImp, dataset=dataset))
 }
 
 
-ensembler <- function(dataset, models, newdata, outcome, type){
-  pred_mat <- sapply(models, load_predict, newdata=newdata, outcome=outcome, type= type, dataset=dataset)
-  return(pred_mat)}
 
 
-stacker <- function(dataset, models, traindf, testdf){
-  #training
-  train_mat <- ensembler(dataset = dataset, models = models, newdata=traindf, outcome = 2, type = "prob")#predict on training data, to create features for training logit model
-  train_df <- data.frame(train_mat, traindf$Class)
-  logit <- glm(traindf.Class~., data=train_df, family="binomial")#train logit on scores derived from same training data as individual models
-  
-  #prediction
-  pred_mat <- ensembler(dataset=dataset, models = models, newdata=testdf, outcome = 2, type = "prob")#predict on test data using each model
-  log_ensemble <- predict(logit, newdata=data.frame(pred_mat), type="response")#combine model predictions on test data, using logit model
-  return(log_ensemble)}
 
 #used for API
 live_blender <- function(dataset, models, Cl.thickness, Cell.size, Cell.shape, Marg.adhesion, Epith.c.size, Bare.nuclei, Bl.cromatin, Normal.nucleoli, Mitoses){
@@ -92,18 +72,6 @@ live_blender <- function(dataset, models, Cl.thickness, Cell.size, Cell.shape, M
   mean(pred_vec)
   }
 
-
-#need to refactor
-stackerL1 <- function(dataset, models, traindf, testdf){
-  #training
-  train_mat <- ensembler(dataset = dataset, models = models, newdata=traindf, outcome = 2, type = "prob")#predict on training data, to create features for training logit model
-  l1m <- LiblineaR(data = train_mat, target = training$Class, type = 6, cost = 1, epsilon = 0.01,
-                   svr_eps = NULL, bias = TRUE, wi = NULL, cross = 0, verbose = FALSE)#train logit on scores derived from same training data as individual models
-  
-  #prediction
-  pred_mat <- ensembler(dataset=dataset, models = models, newdata=testdf, outcome = 2, type = "prob")#predict on test data using each model
-  log_ensemble <- predict(l1m, newx=pred_mat, proba=TRUE)#combine model predictions on test data, using logit model
-  return(log_ensemble$probabilities[,2])}
 
 stackerReg <- function(models, train_mat, pred_mat, cost, type){
   l1m <- LiblineaR(data = train_mat[ ,models], target = training$Class, type = type, cost = cost, epsilon = 0.01,

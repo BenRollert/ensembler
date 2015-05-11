@@ -1,4 +1,4 @@
-#' Load 'results' object from an .Rda file; can assign output to a variable.
+#' Load results from a caret train object saved in an .Rda file; can assign output to a variable.
 #' 
 #' @param dataset A character string specifying the dataset associated with the desired results object.
 #' @param par A character string specifying the parameter or model associated with the desired results object.
@@ -81,7 +81,7 @@ live_blender <- function(dataset, models, Cl.thickness, Cell.size, Cell.shape, M
 
 
 stackerReg <- function(models, train_mat, pred_mat, cost, type){
-  l1m <- LiblineaR(data = train_mat[ ,models], target = training$Class, type = type, cost = cost, epsilon = 0.01,
+  l1m <- LiblineaR::LiblineaR(data = train_mat[ ,models], target = training$Class, type = type, cost = cost, epsilon = 0.01,
                    svr_eps = NULL, bias = TRUE, wi = NULL, cross = 0, verbose = FALSE)
   log_ensemble <- predict(l1m, newx=pred_mat[ ,models], proba=TRUE)#combine model predictions on test data, using logit model
   return(log_ensemble$probabilities[,2])
@@ -91,24 +91,24 @@ stackerReg <- function(models, train_mat, pred_mat, cost, type){
 topModel <- function(n, ordered_acc, pred_mat, reference){
   if(n>1){
   top_mean <- apply(pred_mat[,ordered_acc$model[1:n]], 1, mean)
-  pred <- prediction(top_mean, reference)
-  perf <- performance(pred, "tpr", "fpr")
-  auc.tmp <- performance(pred, "auc")
+  pred <- ROCR::prediction(top_mean, reference)
+  perf <- ROCR::performance(pred, "tpr", "fpr")
+  auc.tmp <- ROCR::performance(pred, "auc")
   auc <- as.numeric(auc.tmp@y.values)
   cbind(as.integer(n), auc, paste(ordered_acc$model[1:n], collapse=", "))  
   }else{
     top_mean <-pred_mat[,ordered_acc$model[1]]
-    pred <- prediction(top_mean, reference)
-    perf <- performance(pred, "tpr", "fpr")
-    auc.tmp <- performance(pred, "auc")
+    pred <- ROCR::prediction(top_mean, reference)
+    perf <- ROCR::performance(pred, "tpr", "fpr")
+    auc.tmp <- ROCR::performance(pred, "auc")
     auc <- as.numeric(auc.tmp@y.values)
     cbind(as.integer(n), auc, paste(ordered_acc$model[1]))}
 }
 
 topComb <- function(ordered_acc, pred_mat, reference){
   top_ens <- sapply(1:length(models), topModel, ordered_acc= ordered_acc, pred_mat=pred_mat, reference=reference)
-  top_m <- data.table(t(top_ens))
-  setnames(top_m, c("number_models", "AUC", "model_names"))
+  top_m <- data.frame(t(top_ens))
+  colnames(top_m) <- c("number_models", "AUC", "model_names")
   top_m
  }
 
@@ -120,10 +120,10 @@ topComb <- function(ordered_acc, pred_mat, reference){
 #' @examples
 #' AUC <- aucFun(pred, reference)
 aucFun <- function(pred, reference) {
-  pred <- prediction(pred, reference)
-  perf <- performance(pred, "tpr", "fpr")
+  pred <- ROCR::prediction(pred, reference)
+  perf <- ROCR::performance(pred, "tpr", "fpr")
   plot(perf)
-  auc.tmp <- performance(pred, "auc")
+  auc.tmp <- ROCR::performance(pred, "auc")
   auc <- as.numeric(auc.tmp@y.values)
   print(auc)}
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_func.R
 \name{loadResults}
 \alias{loadResults}
-\title{Load results from a caret train object saved in an .Rda file; can assign output to a variable.}
+\title{Load results from a caret train object saved in an .Rda file.}
 \usage{
 loadResults(dataset, par)
 }
@@ -15,7 +15,8 @@ loadResults(dataset, par)
 The 'results' slot from a caret train object.
 }
 \description{
-Load results from a caret train object saved in an .Rda file; can assign output to a variable.
+Loads an Rda file in the enclosing function environment.
+Allows for assignment of the Rda file to a variable, without polluting the global environment.
 }
 \examples{
 results <- loadResults("BreastCancer", "nnet")

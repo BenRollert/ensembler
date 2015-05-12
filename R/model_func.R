@@ -125,7 +125,20 @@ live_blender <- function(dataset, models, Cl.thickness, Cell.size, Cell.shape, M
   mean(pred_vec)
   }
 
-
+#' Stack a set of models using a regularized logistic regression
+#' 
+#' 
+#' @param models character vector specifying which models to stack.
+#' @param train_mat A matrix containing the scored training data created from calling predict.ensemble on the training data, along with a model list. 
+#' @param pred_mat A matrix containing the scored test data created from calling predict.ensemble on the testing data, along with a model list. 
+#' @param cost An integer specifying the cost parameter of the regularized logistic regression. See package LiblineaR for details.
+#' @param type An integer specifying the type of regularization. See package LiblineaR for details.
+#' @return a numeric vector of probabilties indicating the probability of the target class.
+#' @examples
+#' pred_mat <- predict(model_list, newdata=testing, type="prob", outcome=2)
+#' train_mat <- predict(model_list, newdata=training, type="prob", outcome=2)
+#' log_ensemble <- stackerReg(models=models, train_mat=train_mat, pred_mat=pred_mat, cost=1, type=6)
+#' @export
 stackerReg <- function(models, train_mat, pred_mat, cost, type){
   l1m <- LiblineaR::LiblineaR(data = train_mat[ ,models], target = training$Class, type = type, cost = cost, epsilon = 0.01,
                    svr_eps = NULL, bias = TRUE, wi = NULL, cross = 0, verbose = FALSE)

@@ -30,7 +30,7 @@ launcher <- function(script, dataset, par){
 
 #' Compare results from caret models trained on multiple instances on Domino.
 #' 
-#' Assumes results are downloaded as .Rda files to a single machine. Loads Rda and files and rbinds the results objects into a single data.frame for the sake of comparison.
+#' Assumes results are downloaded as .Rda files to a single machine. Loads Rda files and rbinds the results objects into a single data.frame for the sake of comparison.
 #' 
 #' @param dataset A character string specifying the name of the dataset you are training the models on.
 #' @param par Character string vector specifying the parameters of interest. Examples of parameters include different values of hyperparameters or different caret methods.
@@ -164,6 +164,19 @@ topModel <- function(n, ordered_acc, pred_mat, reference){
     cbind(as.integer(n), auc, paste(ordered_acc$model[1]))}
 }
 
+#' Compare the performance of ensembles of top performing models.
+#' 
+#' Cumulatively adds models to an ensemble based on their rank accuracy, i.e. a "top n models" approach. Creates and tests ensembles by taking a simple average of the models in the ensemble.
+#' 
+#' 
+#' @param ordered_acc data.frame with caret train results ordered by accuracy.
+#' @param pred_mat A matrix containing the scored test data created from calling predict.ensemble on the testing data, along with a model list. 
+#' @param reference A numeric vector containing ground truth values
+#' @return a data.frame showing the preformance of the ensemlbe of top n models.
+#' @examples
+#' ordered_acc <- compare(models, dataset=dataset, metric="ROC")
+#' dt_model <- topComb(ordered_acc, pred_mat, reference)
+#' @export
 topComb <- function(ordered_acc, pred_mat, reference){
   top_ens <- sapply(1:length(models), topModel, ordered_acc= ordered_acc, pred_mat=pred_mat, reference=reference)
   top_m <- data.frame(t(top_ens))

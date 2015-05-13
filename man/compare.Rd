@@ -17,7 +17,7 @@ compare(dataset, par, metric)
 data.frame containing results from caret train objects, ranked in descending order according to the chosen accuracy metric.
 }
 \description{
-Assumes results are downloaded as .Rda files to a single machine. Loads Rda and files and rbinds the results objects into a single data.frame for the sake of comparison.
+Assumes results are downloaded as .Rda files to a single machine. Loads Rda files and rbinds the results objects into a single data.frame for the sake of comparison.
 }
 \examples{
 models <- c("nnet", "rf", "gbm")

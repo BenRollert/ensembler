@@ -11,12 +11,11 @@ Description: Domino Datalab (www.dominoup.com) offers R users a
   users to train models on seperate AWS instances in the cloud. ensembler also offers a clean interface for downloading and combining 
   Rdata files from Domino. 
 License: MIT
-Imports:
+Imports: 
   domino,
   caret,
   mlbench,
   ROCR,
   LiblineaR
-  
-
-
+Suggests: knitr
+VignetteBuilder: knitr

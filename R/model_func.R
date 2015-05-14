@@ -69,6 +69,24 @@ modelList <- function(dataset, models){
   ens
 }
 
+#' Create a caretList object from caret models trained on multiple Domino instances.
+#' 
+#' Assumes caret train objects are downloaded as .Rda files to a single machine. Loads Rda files and returns all caret models in a single list.
+#' Returns an object of class "caretList" for the sake of interoperablity with the package caretEnsemble.
+#' 
+#' @param dataset A character string specifying the name of the dataset you are training the models on.
+#' @param models Character string vector specifying the names of the models you wish to load.
+#' @return a list of class "caretList" containing caret train objects.
+#' @examples
+#' models <- c("nnet", "rf", "gbm")
+#' modelList(dataset = "BreastCancer", models = models)
+#' @export
+load_caret_list <- function(dataset, models){
+  ens <- lapply(models, load_models, dataset=dataset)
+  class(ens) <- "caretList"
+  ens
+}
+
 #' Predict method for objects of class "ensemble"
 #' 
 #' 

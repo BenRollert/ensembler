@@ -16,6 +16,7 @@ Imports:
   caret,
   mlbench,
   ROCR,
-  LiblineaR
+  LiblineaR,
+  caretEnsemble
 Suggests: knitr
 VignetteBuilder: knitr

@@ -4,7 +4,7 @@
 \alias{predict.ensemble}
 \title{Predict method for objects of class "ensemble"}
 \usage{
-\method{predict}{ensemble}(model_list, newdata, type, outcome)
+predict.ensemble(model_list, newdata, type, outcome)
 }
 \arguments{
 \item{model_list}{An object of class "ensemble" containing a list of caret train objects}

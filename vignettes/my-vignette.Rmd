@@ -11,25 +11,143 @@ vignette: >
 
 Domino Datalab (www.dominoup.com) offers a powerful platform for training models in the cloud. The `ensembler` package aims to make it easier to launch, train, and combine models by extending the functionality of both the `domino` and `caret` packages. In this vingette, we'll cover a simple use case in which we train a classifier on the classic `BreastCancer` dataset. 
 
-## Vignette Info
+## Logging into Domino
 
-Note the various macros within the `vignette` setion of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+Assuming you already have a Domino account, the first step is to log into Domino from R:
+```
+install.packages("domino")
+library(domino)
+domino.login("username", "password")
+```
 
-## Styles
+## Create a domino project
+We need to create a domino project:
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+```
+domino.create("my-new-project")
+# current working directory is now switched to ./my-new-project and new project is initialized.
+```
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
+From here on out, we will work out of the directory our Domino project is in.
 
-## Figures
 
-The figure sizes have been customised so that you can easily put two images side-by-side. 
 
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+## Load the data
+
+The next step is to split our data into training and test sets, and then save the results in an .Rda file. For this example, we attach the BreastCancer dataset from the `mlbench` packge. The `mlbench` package contains useful datasets for benchmarking machine learning algorithms. Note that we also impute missing values using `rfImpute` from the `randomForest` package for conevenience - but it's normally not a kosher practice to impute values on the test set using the test set labels!
+
+```
+library(mlbench)
+library(caret)
+library(randomForest)
+data(BreastCancer)
+
+BreastCancer <- BreastCancer[ ,-1]
+BreastCancer <- rfImpute(data=BreastCancer, y=BreastCancer$Class, x=BreastCancer[ ,1:9])
+colnames(BreastCancer)[1] <- c("Class")
+
+inTrain <- createDataPartition(y= BreastCancer$Class, p=.8, list=FALSE)
+training <- BreastCancer[inTrain,]
+testing <- BreastCancer[-inTrain,]
+
+
+save(training, testing, file="BreastCancer.Rda")
+```
+Our datasets will be pushed to Domino's remote server as soon as we launch a run.
+
+## Create a script to train caret methods.
+This is the trickiest part, as it requires us to build a script that can generalize well across many different methods. For this demo, our script is flexible enough to accomodate virtually any binary classification method in the `caret` package.
+
+Below is a sample script for our demo, that we title `variable_model.R`:
+
+```
+install.packages("mboost")
+library(caret)
+library(doParallel)
+registerDoParallel(detectCores())
+
+
+
+dataset <- commandArgs(trailingOnly = TRUE)[1]
+load(paste0(dataset,".Rda"))
+
+method <- commandArgs(trailingOnly = TRUE)[2]
+
+n_samples <- 10
+set.seed(12)
+folds <- createFolds(training$Class, n_samples)
+
+
+trCtrl <- trainControl(method = "cv", 
+                       number = n_samples, 
+                       summaryFunction=twoClassSummary,
+                       allowParallel = TRUE,
+                       classProbs =  TRUE,
+                       savePredictions=TRUE,
+                       indexOut = folds)
+
+model <- train(Class~., 
+               data = training,
+               metric="ROC",
+               method = method,
+               trControl = trCtrl)
+
+print(model)
+
+results <- model$results
+results <- results[which.max(results$ROC), c("ROC",    "Sens",   "Spec",   "ROCSD",  "SensSD",  "SpecSD")]
+results <- cbind(results, data.frame(model = rep(method, nrow(results))))
+
+save(results, file = sprintf("results_%s_%s.Rda", dataset, method))#save best results vector
+save(model, file = sprintf("model_obj_%s_%s.Rda", dataset, method))#save object of class "train"
+```
+After having saved the above script as `variable_model.R` in our working directory, we are ready to launch some runs.
+
+##Launch runs to train multiple caret methods on the same dataset, in parallel
+We now decide on a set of caret methods we wish to train on our training data. Then we launch runs on domino by programmatically passing our caret methods as arguments to the script `variable_model.R`
+
+```
+library(ensembler)
+library(domino)
+dataset <- "BreastCancer"
+
+#vector specifying different caret methods
+models_breast <- c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost")
+
+launcher(script = "variable_model.R", dataset=dataset, par=models_breast)
+```
+Notice that we pass the name of the dataset as a variable. This is so that we tag our .Rda files with a name we can use to load the files in the future. We could use a more sophisticated name convention for the dataset, or any name want for that matter. The only key is to keep track of the name we use so that we are able to load the results of our model training in the next step.
+
+##Downloading and combining results from Domino runs
+Now we're going to download the .Rda files from Domino and combine the results.
+
+```
+library(caret)
+library(ensembler)
+library(domino)
+domino.download()#downloads .Rda files into our working directory
+
+dataset <- "BreastCancer"
+label <- "malignant"
+
+#compare accuracy of models
+models_breast <- c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost") #name of methods we launched in previous step
+ordered_acc <- compare(models_breast, dataset=dataset, metric="ROC")
+print(ordered_acc)
+print(ordered_acc[which.max(ordered_acc$ROC), ])#model with greatest ROC
+```
+We've loaded the results from the caret train objects on our local machine, and combined them in one data.frame so that we can directly compare the accuracy of different models.
+As mentioned in the previous step, we need to specify the name of the dataset, as this allows us to load the correct .Rda files; the name passed to `compare` must be identical to the name we used in the `launcher` function.
+
+##build a caretList from our caret train models
+We're finally ready to build an ensemble from the models we trained on Domino. `ensembler` can create objects of class `caretList` in order to integrate with the 
+`caretEnsemble` package.
+
+```
+model_list <- load_caret_list(dataset="BreastCancer", models=models)
+greedy_ensemble <- caretEnsemble(model_list)
+ens_preds <- predict(greedy_ensemble, newdata=testing)
+aucFun(ens_preds, reference)
 ```
 
 You can enable figure captions by `fig_caption: yes` in YAML:

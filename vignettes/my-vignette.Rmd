@@ -145,10 +145,19 @@ We're finally ready to build an ensemble from the models we trained on Domino. `
 
 ```
 model_list <- load_caret_list(dataset="BreastCancer", models=models)
-greedy_ensemble <- caretEnsemble(model_list)
+greedy_ensemble <- caretEnsemble(model_list)#greedy forward selection
+#$weights
+#nnet   rf 
+#0.64 0.36 
+
+#use optimal blend as an ensemble, predict on test data
 ens_preds <- predict(greedy_ensemble, newdata=testing)
 aucFun(ens_preds, reference)
+#0.985348
 ```
+
+Once we have created a `caretList` object we can use any of the methods from the `caretEnsemble` package, including `caretStack`. To learn more about the `caretEnsemble` package,
+check out the [caretEnsemble vignette](http://cran.r-project.org/web/packages/caretEnsemble/vignettes/caretEnsemble-intro.html)
 
 You can enable figure captions by `fig_caption: yes` in YAML:
 

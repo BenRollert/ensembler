@@ -190,9 +190,9 @@ We can test the API endpoint with the following curl request passing inputs to o
 
 ```
 curl -v -X POST \
-    https://endpoint.dominodatalab.com/v1/benjaminrollert/UseRgroup/endpoint \
+    https://endpoint.dominodatalab.com/v1/<username>/my-new-project/endpoint \
     -H "Content-Type: application/json" \
-    -H 'X-Domino-Api-Key: '$DOMINO_API'' \
+    -H 'X-Domino-Api-Key: <API Key>' \
     -d '{"parameters": [2, 3, 4, 2, 5, 3, 4, 2, 3]}'
     
 ```  

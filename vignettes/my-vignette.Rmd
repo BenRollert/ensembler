@@ -47,8 +47,8 @@ BreastCancer <- rfImpute(data=BreastCancer, y=BreastCancer$Class, x=BreastCancer
 colnames(BreastCancer)[1] <- c("Class")
 
 inTrain <- createDataPartition(y= BreastCancer$Class, p=.8, list=FALSE)
-training <- BreastCancer[inTrain,]
-testing <- BreastCancer[-inTrain,]
+training <- BreastCancer[inTrain, ]
+testing <- BreastCancer[-inTrain, ]
 
 
 save(training, testing, file="BreastCancer.Rda")
@@ -159,23 +159,43 @@ aucFun(ens_preds, reference)
 Once we have created a `caretList` object we can use any of the methods from the `caretEnsemble` package, including `caretStack`. To learn more about the `caretEnsemble` package,
 check out the [caretEnsemble vignette](http://cran.r-project.org/web/packages/caretEnsemble/vignettes/caretEnsemble-intro.html)
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+##publish a live API endpoint
+We can publish a live API endpoint on Domnino by creatining a script with the function we wish to invoke. In this case, we return a closure `APIFunc` containing the ensemble method we developed in the preceding step. We will name our script `Cancer_API.R`:
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+```
+install.packages("mboost")
+devtools::install_github("BenRollert/ensembler")
+library(ensembler)
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+blender_fact <-  function(ensemble){
+  function(Cl.thickness, Cell.size, Cell.shape, Marg.adhesion, Epith.c.size, Bare.nuclei, Bl.cromatin, Normal.nucleoli, Mitoses){
+  df <- data.frame(Cl.thickness = Cl.thickness, Cell.size = Cell.size, Cell.shape = Cell.shape, Marg.adhesion = Marg.adhesion, Epith.c.size = Epith.c.size, 
+                    Bare.nuclei = Bar.nuclei, Bl.cromatin =Bl.cromatin, Normal.nucleoli =Normal.nucleoli, Mitoses = Mitoses)
+  df <- data.frame(lapply(df, as.factor))
+  df[2, ] <- df[1, ]#hideous hack for bug on single row df in predict.caretEnsemble
+  ens_preds <- predict(ensemble, newdata=df)
+  ens_preds[1]
+  }
+}
 
-## More Examples
+model_list <- load_caret_list(dataset="BreastCancer", models=c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost"))
+greedy_ensemble <- caretEnsemble::caretEnsemble(model_list)
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+APIFunc <- blender_fact(ensemble=greedy_ensemble)
 ```
 
-Also a quote using `>`:
+In Domino, we publish the endpoint by speciying the script name `Cancer_API.R` and the function to invoke `APIFunc`. 
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+We can test the API endpoint with the following curl request passing inputs to our ensemble:
+
+```
+curl -v -X POST \
+    https://endpoint.dominodatalab.com/v1/benjaminrollert/UseRgroup/endpoint \
+    -H "Content-Type: application/json" \
+    -H 'X-Domino-Api-Key: '$DOMINO_API'' \
+    -d '{"parameters": [2, 3, 4, 2, 5, 3, 4, 2, 3]}'
+    
+```  
+
+
+

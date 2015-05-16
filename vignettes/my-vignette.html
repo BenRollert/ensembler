@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Benjamin Paul Rollert" />
+
+<meta name="date" content="2015-05-15" />
+
+<title>Using ensembler with Domino Datalab</title>
+
+
+
+
+<link href="data:text/css,body%20%7B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20max%2Dwidth%3A%20700px%3B%0A%20%20overflow%3A%20visible%3B%0A%20%20padding%2Dleft%3A%202em%3B%0A%20%20padding%2Dright%3A%202em%3B%0A%20%20font%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0A%20%20font%2Dsize%3A%2014px%3B%0A%20%20line%2Dheight%3A%201%2E35%3B%0A%7D%0A%0A%23header%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0A%0A%23TOC%20%7B%0A%20%20clear%3A%20both%3B%0A%20%20margin%3A%200%200%2010px%2010px%3B%0A%20%20padding%3A%204px%3B%0A%20%20width%3A%20400px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20border%2Dradius%3A%205px%3B%0A%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20font%2Dsize%3A%2013px%3B%0A%20%20line%2Dheight%3A%201%2E3%3B%0A%7D%0A%20%20%23TOC%20%2Etoctitle%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%20%20font%2Dsize%3A%2015px%3B%0A%20%20%20%20margin%2Dleft%3A%205px%3B%0A%20%20%7D%0A%0A%20%20%23TOC%20ul%20%7B%0A%20%20%20%20padding%2Dleft%3A%2040px%3B%0A%20%20%20%20margin%2Dleft%3A%20%2D1%2E5em%3B%0A%20%20%20%20margin%2Dtop%3A%205px%3B%0A%20%20%20%20margin%2Dbottom%3A%205px%3B%0A%20%20%7D%0A%20%20%23TOC%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dleft%3A%20%2D2em%3B%0A%20%20%7D%0A%20%20%23TOC%20li%20%7B%0A%20%20%20%20line%2Dheight%3A%2016px%3B%0A%20%20%7D%0A%0Atable%20%7B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dcolor%3A%20%23DDDDDD%3B%0A%20%20border%2Dstyle%3A%20outset%3B%0A%20%20border%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0A%20%20border%2Dwidth%3A%202px%3B%0A%20%20padding%3A%205px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%20%20line%2Dheight%3A%2018px%3B%0A%20%20padding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Ap%20%7B%0A%20%20margin%3A%200%2E5em%200%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20padding%3A%200%2E25em%200%2E75em%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20border%2Dstyle%3A%20solid%3B%0A%20%20border%3A%20none%3B%0A%20%20border%2Dtop%3A%201px%20solid%20%23777%3B%0A%20%20margin%3A%2028px%200%3B%0A%7D%0A%0Adl%20%7B%0A%20%20margin%2Dleft%3A%200%3B%0A%7D%0A%20%20dl%20dd%20%7B%0A%20%20%20%20margin%2Dbottom%3A%2013px%3B%0A%20%20%20%20margin%2Dleft%3A%2013px%3B%0A%20%20%7D%0A%20%20dl%20dt%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%7D%0A%0Aul%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%7D%0A%20%20ul%20li%20%7B%0A%20%20%20%20list%2Dstyle%3A%20circle%20outside%3B%0A%20%20%7D%0A%20%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dbottom%3A%200%3B%0A%20%20%7D%0A%0Apre%2C%20code%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20color%3A%20%23333%3B%0A%7D%0Apre%20%7B%0A%20%20white%2Dspace%3A%20pre%2Dwrap%3B%20%20%20%20%2F%2A%20Wrap%20long%20lines%20%2A%2F%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20margin%3A%205px%200px%2010px%200px%3B%0A%20%20padding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Acode%20%7B%0A%20%20font%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0A%20%20padding%3A%202px%200px%3B%0A%7D%0A%0Adiv%2Efigure%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20padding%3A%202px%3B%0A%20%20border%3A%201px%20solid%20%23DDDDDD%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20margin%3A%200%205px%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20font%2Dsize%3A%2035px%3B%0A%20%20line%2Dheight%3A%2040px%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20border%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20padding%2Dbottom%3A%202px%3B%0A%20%20font%2Dsize%3A%20145%25%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20border%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20font%2Dsize%3A%20120%25%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0A%20%20margin%2Dleft%3A%208px%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Ah5%2C%20h6%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23ccc%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Aa%20%7B%0A%20%20color%3A%20%230033dd%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%20%20a%3Ahover%20%7B%0A%20%20%20%20color%3A%20%236666ff%3B%20%7D%0A%20%20a%3Avisited%20%7B%0A%20%20%20%20color%3A%20%23800080%3B%20%7D%0A%20%20a%3Avisited%3Ahover%20%7B%0A%20%20%20%20color%3A%20%23BB00BB%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%0A%2F%2A%20Class%20described%20in%20https%3A%2F%2Fbenjeffrey%2Ecom%2Fposts%2Fpandoc%2Dsyntax%2Dhighlighting%2Dcss%0A%20%20%20Colours%20from%20https%3A%2F%2Fgist%2Egithub%2Ecom%2Frobsimmons%2F1172277%20%2A%2F%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Keyword%20%2A%2F%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%2F%2A%20DataType%20%2A%2F%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%2F%2A%20DecVal%20%28decimal%20values%29%20%2A%2F%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20BaseN%20%2A%2F%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Float%20%2A%2F%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Char%20%2A%2F%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20String%20%2A%2F%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%2F%2A%20Comment%20%2A%2F%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%2F%2A%20OtherToken%20%2A%2F%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20AlertToken%20%2A%2F%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Function%20calls%20%2A%2F%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%2F%2A%20ErrorTok%20%2A%2F%0A%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+<div id="header">
+<h1 class="title">Using ensembler with Domino Datalab</h1>
+<h4 class="author"><em>Benjamin Paul Rollert</em></h4>
+<h4 class="date"><em>2015-05-15</em></h4>
+</div>
+
+
+<p>Domino Datalab (www.dominoup.com) offers a powerful platform for training models in the cloud. The <code>ensembler</code> package aims to make it easier to launch, train, and combine models by extending the functionality of both the <code>domino</code> and <code>caret</code> packages. In this vingette, we’ll cover a simple use case in which we train a classifier on the classic <code>BreastCancer</code> dataset.</p>
+<div id="logging-into-domino" class="section level2">
+<h2>Logging into Domino</h2>
+<p>Assuming you already have a Domino account, the first step is to log into Domino from R:</p>
+<pre><code>install.packages(&quot;domino&quot;)
+library(domino)
+domino.login(&quot;username&quot;, &quot;password&quot;)</code></pre>
+</div>
+<div id="create-a-domino-project" class="section level2">
+<h2>Create a domino project</h2>
+<p>We need to create a domino project:</p>
+<pre><code>domino.create(&quot;my-new-project&quot;)
+# current working directory is now switched to ./my-new-project and new project is initialized.</code></pre>
+<p>From here on out, we will work out of the directory our Domino project is in.</p>
+</div>
+<div id="load-the-data" class="section level2">
+<h2>Load the data</h2>
+<p>The next step is to split our data into training and test sets, and then save the results in an .Rda file. For this example, we attach the BreastCancer dataset from the <code>mlbench</code> packge. The <code>mlbench</code> package contains useful datasets for benchmarking machine learning algorithms. Note that we also impute missing values using <code>rfImpute</code> from the <code>randomForest</code> package for conevenience - but it’s normally not a kosher practice to impute values on the test set using the test set labels!</p>
+<pre><code>library(mlbench)
+library(caret)
+library(randomForest)
+data(BreastCancer)
+
+BreastCancer &lt;- BreastCancer[ ,-1]
+BreastCancer &lt;- rfImpute(data=BreastCancer, y=BreastCancer$Class, x=BreastCancer[ ,1:9])
+colnames(BreastCancer)[1] &lt;- c(&quot;Class&quot;)
+
+inTrain &lt;- createDataPartition(y= BreastCancer$Class, p=.8, list=FALSE)
+training &lt;- BreastCancer[inTrain, ]
+testing &lt;- BreastCancer[-inTrain, ]
+
+
+save(training, testing, file=&quot;BreastCancer.Rda&quot;)</code></pre>
+<p>Our datasets will be pushed to Domino’s remote server as soon as we launch a run.</p>
+</div>
+<div id="create-a-script-to-train-caret-methods." class="section level2">
+<h2>Create a script to train caret methods.</h2>
+<p>This is the trickiest part, as it requires us to build a script that can generalize well across many different methods. For this demo, our script is flexible enough to accomodate virtually any binary classification method in the <code>caret</code> package.</p>
+<p>Below is a sample script for our demo, that we title <code>variable_model.R</code>:</p>
+<pre><code>install.packages(&quot;mboost&quot;)
+library(caret)
+library(doParallel)
+registerDoParallel(detectCores())
+
+
+
+dataset &lt;- commandArgs(trailingOnly = TRUE)[1]
+load(paste0(dataset,&quot;.Rda&quot;))
+
+method &lt;- commandArgs(trailingOnly = TRUE)[2]
+
+n_samples &lt;- 10
+set.seed(12)
+folds &lt;- createFolds(training$Class, n_samples)
+
+
+trCtrl &lt;- trainControl(method = &quot;cv&quot;, 
+                       number = n_samples, 
+                       summaryFunction=twoClassSummary,
+                       allowParallel = TRUE,
+                       classProbs =  TRUE,
+                       savePredictions=TRUE,
+                       indexOut = folds)
+
+model &lt;- train(Class~., 
+               data = training,
+               metric=&quot;ROC&quot;,
+               method = method,
+               trControl = trCtrl)
+
+print(model)
+
+results &lt;- model$results
+results &lt;- results[which.max(results$ROC), c(&quot;ROC&quot;,    &quot;Sens&quot;,   &quot;Spec&quot;,   &quot;ROCSD&quot;,  &quot;SensSD&quot;,  &quot;SpecSD&quot;)]
+results &lt;- cbind(results, data.frame(model = rep(method, nrow(results))))
+
+save(results, file = sprintf(&quot;results_%s_%s.Rda&quot;, dataset, method))#save best results vector
+save(model, file = sprintf(&quot;model_obj_%s_%s.Rda&quot;, dataset, method))#save object of class &quot;train&quot;</code></pre>
+<p>After having saved the above script as <code>variable_model.R</code> in our working directory, we are ready to launch some runs.</p>
+</div>
+<div id="launch-runs-to-train-multiple-caret-methods-on-the-same-dataset-in-parallel" class="section level2">
+<h2>Launch runs to train multiple caret methods on the same dataset, in parallel</h2>
+<p>We now decide on a set of caret methods we wish to train on our training data. Then we launch runs on domino by programmatically passing our caret methods as arguments to the script <code>variable_model.R</code></p>
+<pre><code>library(ensembler)
+library(domino)
+dataset &lt;- &quot;BreastCancer&quot;
+
+#vector specifying different caret methods
+models_breast &lt;- c(&quot;nnet&quot;, &quot;rf&quot;, &quot;svmLinear&quot;, &quot;svmRadial&quot;, &quot;svmPoly&quot;, &quot;gbm&quot;, &quot;glm&quot;, &quot;glmboost&quot;)
+
+launcher(script = &quot;variable_model.R&quot;, dataset=dataset, par=models_breast)</code></pre>
+<p>Notice that we pass the name of the dataset as a variable. This is so that we tag our .Rda files with a name we can use to load the files in the future. We could use a more sophisticated name convention for the dataset, or any name want for that matter. The only key is to keep track of the name we use so that we are able to load the results of our model training in the next step.</p>
+</div>
+<div id="downloading-and-combining-results-from-domino-runs" class="section level2">
+<h2>Downloading and combining results from Domino runs</h2>
+<p>Now we’re going to download the .Rda files from Domino and combine the results.</p>
+<pre><code>library(caret)
+library(ensembler)
+library(domino)
+domino.download()#downloads .Rda files into our working directory
+
+dataset &lt;- &quot;BreastCancer&quot;
+label &lt;- &quot;malignant&quot;
+
+#compare accuracy of models
+models_breast &lt;- c(&quot;nnet&quot;, &quot;rf&quot;, &quot;svmLinear&quot;, &quot;svmRadial&quot;, &quot;svmPoly&quot;, &quot;gbm&quot;, &quot;glm&quot;, &quot;glmboost&quot;) #name of methods we launched in previous step
+ordered_acc &lt;- compare(models_breast, dataset=dataset, metric=&quot;ROC&quot;)
+print(ordered_acc)
+print(ordered_acc[which.max(ordered_acc$ROC), ])#model with greatest ROC</code></pre>
+<p>We’ve loaded the results from the caret train objects on our local machine, and combined them in one data.frame so that we can directly compare the accuracy of different models. As mentioned in the previous step, we need to specify the name of the dataset, as this allows us to load the correct .Rda files; the name passed to <code>compare</code> must be identical to the name we used in the <code>launcher</code> function.</p>
+</div>
+<div id="build-a-caretlist-from-our-caret-train-models" class="section level2">
+<h2>build a caretList from our caret train models</h2>
+<p>We’re finally ready to build an ensemble from the models we trained on Domino. <code>ensembler</code> can create objects of class <code>caretList</code> in order to integrate with the <code>caretEnsemble</code> package.</p>
+<pre><code>model_list &lt;- load_caret_list(dataset=&quot;BreastCancer&quot;, models=models)
+greedy_ensemble &lt;- caretEnsemble(model_list)#greedy forward selection
+#$weights
+#nnet   rf 
+#0.64 0.36 
+
+#use optimal blend as an ensemble, predict on test data
+ens_preds &lt;- predict(greedy_ensemble, newdata=testing)
+aucFun(ens_preds, reference)
+#0.985348</code></pre>
+<p>Once we have created a <code>caretList</code> object we can use any of the methods from the <code>caretEnsemble</code> package, including <code>caretStack</code>. To learn more about the <code>caretEnsemble</code> package, check out the <a href="http://cran.r-project.org/web/packages/caretEnsemble/vignettes/caretEnsemble-intro.html">caretEnsemble vignette</a></p>
+</div>
+<div id="publish-a-live-api-endpoint" class="section level2">
+<h2>publish a live API endpoint</h2>
+<p>We can publish a live API endpoint on Domnino by creatining a script with the function we wish to invoke. In this case, we return a closure <code>APIFunc</code> containing the ensemble method we developed in the preceding step. We will name our script <code>Cancer_API.R</code>:</p>
+<pre><code>install.packages(&quot;mboost&quot;)
+devtools::install_github(&quot;BenRollert/ensembler&quot;)
+library(ensembler)
+
+blender_fact &lt;-  function(ensemble){
+  function(Cl.thickness, Cell.size, Cell.shape, Marg.adhesion, Epith.c.size, Bare.nuclei, Bl.cromatin, Normal.nucleoli, Mitoses){
+  df &lt;- data.frame(Cl.thickness = Cl.thickness, Cell.size = Cell.size, Cell.shape = Cell.shape, Marg.adhesion = Marg.adhesion, Epith.c.size = Epith.c.size, 
+                    Bare.nuclei = Bar.nuclei, Bl.cromatin =Bl.cromatin, Normal.nucleoli =Normal.nucleoli, Mitoses = Mitoses)
+  df &lt;- data.frame(lapply(df, as.factor))
+  df[2, ] &lt;- df[1, ]#hideous hack for bug on single row df in predict.caretEnsemble
+  ens_preds &lt;- predict(ensemble, newdata=df)
+  ens_preds[1]
+  }
+}
+
+model_list &lt;- load_caret_list(dataset=&quot;BreastCancer&quot;, models=c(&quot;nnet&quot;, &quot;rf&quot;, &quot;svmLinear&quot;, &quot;svmRadial&quot;, &quot;svmPoly&quot;, &quot;gbm&quot;, &quot;glm&quot;, &quot;glmboost&quot;))
+greedy_ensemble &lt;- caretEnsemble::caretEnsemble(model_list)
+
+APIFunc &lt;- blender_fact(ensemble=greedy_ensemble)</code></pre>
+<p>In Domino, we publish the endpoint by speciying the script name <code>Cancer_API.R</code> and the function to invoke <code>APIFunc</code>.</p>
+<p>We can test the API endpoint with the following curl request passing inputs to our ensemble:</p>
+<pre><code>curl -v -X POST \
+    https://endpoint.dominodatalab.com/v1/&lt;username&gt;/my-new-project/endpoint \
+    -H &quot;Content-Type: application/json&quot; \
+    -H 'X-Domino-Api-Key: &lt;API Key&gt;' \
+    -d '{&quot;parameters&quot;: [2, 3, 4, 2, 5, 3, 4, 2, 3]}'
+    </code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

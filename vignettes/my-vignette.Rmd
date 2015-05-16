@@ -75,7 +75,7 @@ method <- commandArgs(trailingOnly = TRUE)[2]
 
 n_samples <- 10
 set.seed(12)
-folds <- createFolds(training$Class, n_samples)
+folds <- createFolds(training$Class, n_samples, returnTrain = TRUE)
 
 
 trCtrl <- trainControl(method = "cv", 
@@ -84,7 +84,7 @@ trCtrl <- trainControl(method = "cv",
                        allowParallel = TRUE,
                        classProbs =  TRUE,
                        savePredictions=TRUE,
-                       indexOut = folds)
+                       index = folds)
 
 model <- train(Class~., 
                data = training,

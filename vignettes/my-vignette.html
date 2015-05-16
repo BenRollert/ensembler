@@ -10,7 +10,7 @@
 
 <meta name="author" content="Benjamin Paul Rollert" />
 
-<meta name="date" content="2015-05-15" />
+<meta name="date" content="2015-05-16" />
 
 <title>Using ensembler with Domino Datalab</title>
 
@@ -28,7 +28,7 @@
 <div id="header">
 <h1 class="title">Using ensembler with Domino Datalab</h1>
 <h4 class="author"><em>Benjamin Paul Rollert</em></h4>
-<h4 class="date"><em>2015-05-15</em></h4>
+<h4 class="date"><em>2015-05-16</em></h4>
 </div>
 
 
@@ -85,7 +85,7 @@ method &lt;- commandArgs(trailingOnly = TRUE)[2]
 
 n_samples &lt;- 10
 set.seed(12)
-folds &lt;- createFolds(training$Class, n_samples)
+folds &lt;- createFolds(training$Class, n_samples, returnTrain = TRUE)
 
 
 trCtrl &lt;- trainControl(method = &quot;cv&quot;, 
@@ -94,7 +94,7 @@ trCtrl &lt;- trainControl(method = &quot;cv&quot;,
                        allowParallel = TRUE,
                        classProbs =  TRUE,
                        savePredictions=TRUE,
-                       indexOut = folds)
+                       index = folds)
 
 model &lt;- train(Class~., 
                data = training,
@@ -140,7 +140,18 @@ label &lt;- &quot;malignant&quot;
 models_breast &lt;- c(&quot;nnet&quot;, &quot;rf&quot;, &quot;svmLinear&quot;, &quot;svmRadial&quot;, &quot;svmPoly&quot;, &quot;gbm&quot;, &quot;glm&quot;, &quot;glmboost&quot;) #name of methods we launched in previous step
 ordered_acc &lt;- compare(models_breast, dataset=dataset, metric=&quot;ROC&quot;)
 print(ordered_acc)
-print(ordered_acc[which.max(ordered_acc$ROC), ])#model with greatest ROC</code></pre>
+#ROC      Sens      Spec       ROCSD     SensSD     SpecSD     model
+#8  0.9931318 0.9753754 0.9328947 0.008100897 0.01569929 0.06532880  glmboost
+#5  0.9921756 0.9372372 0.9897368 0.009119749 0.02283511 0.02164553   svmPoly
+#21 0.9911288 0.9725976 0.9586842 0.010071101 0.02248147 0.04058001        rf
+#31 0.9904566 0.9617117 0.9844737 0.010518603 0.02949558 0.03522888 svmRadial
+#6  0.9903658 0.9753754 0.9431579 0.012583448 0.02021861 0.04558366       gbm
+#2  0.9897025 0.9725976 0.9428947 0.013921302 0.02248147 0.03005714      nnet
+#3  0.9828287 0.9644895 0.9226316 0.019389698 0.02586685 0.07367586 svmLinear
+#7  0.9549361 0.9617868 0.8544737 0.026650048 0.02629045 0.05517328       glm
+print(ordered_acc[which.max(ordered_acc$ROC), ])#model with greatest ROC
+#ROC      Sens      Spec       ROCSD     SensSD    SpecSD    model
+#8 0.9931318 0.9753754 0.9328947 0.008100897 0.01569929 0.0653288 glmboost</code></pre>
 <p>We’ve loaded the results from the caret train objects on our local machine, and combined them in one data.frame so that we can directly compare the accuracy of different models. As mentioned in the previous step, we need to specify the name of the dataset, as this allows us to load the correct .Rda files; the name passed to <code>compare</code> must be identical to the name we used in the <code>launcher</code> function.</p>
 </div>
 <div id="build-a-caretlist-from-our-caret-train-models" class="section level2">
@@ -167,8 +178,7 @@ library(ensembler)
 
 blender_fact &lt;-  function(ensemble){
   function(Cl.thickness, Cell.size, Cell.shape, Marg.adhesion, Epith.c.size, Bare.nuclei, Bl.cromatin, Normal.nucleoli, Mitoses){
-  df &lt;- data.frame(Cl.thickness = Cl.thickness, Cell.size = Cell.size, Cell.shape = Cell.shape, Marg.adhesion = Marg.adhesion, Epith.c.size = Epith.c.size, 
-                    Bare.nuclei = Bar.nuclei, Bl.cromatin =Bl.cromatin, Normal.nucleoli =Normal.nucleoli, Mitoses = Mitoses)
+  df &lt;- data.frame(Cl.thickness = Cl.thickness, Cell.size = Cell.size, Cell.shape = Cell.shape, Marg.adhesion = Marg.adhesion, Epith.c.size = Epith.c.size, Bare.nuclei = Bar.nuclei, Bl.cromatin = Bl.cromatin, Normal.nucleoli = Normal.nucleoli, Mitoses = Mitoses)
   df &lt;- data.frame(lapply(df, as.factor))
   df[2, ] &lt;- df[1, ]#hideous hack for bug on single row df in predict.caretEnsemble
   ens_preds &lt;- predict(ensemble, newdata=df)

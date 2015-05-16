@@ -134,7 +134,18 @@ label <- "malignant"
 models_breast <- c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost") #name of methods we launched in previous step
 ordered_acc <- compare(models_breast, dataset=dataset, metric="ROC")
 print(ordered_acc)
+#ROC      Sens      Spec       ROCSD     SensSD     SpecSD     model
+#8  0.9931318 0.9753754 0.9328947 0.008100897 0.01569929 0.06532880  glmboost
+#5  0.9921756 0.9372372 0.9897368 0.009119749 0.02283511 0.02164553   svmPoly
+#21 0.9911288 0.9725976 0.9586842 0.010071101 0.02248147 0.04058001        rf
+#31 0.9904566 0.9617117 0.9844737 0.010518603 0.02949558 0.03522888 svmRadial
+#6  0.9903658 0.9753754 0.9431579 0.012583448 0.02021861 0.04558366       gbm
+#2  0.9897025 0.9725976 0.9428947 0.013921302 0.02248147 0.03005714      nnet
+#3  0.9828287 0.9644895 0.9226316 0.019389698 0.02586685 0.07367586 svmLinear
+#7  0.9549361 0.9617868 0.8544737 0.026650048 0.02629045 0.05517328       glm
 print(ordered_acc[which.max(ordered_acc$ROC), ])#model with greatest ROC
+#ROC      Sens      Spec       ROCSD     SensSD    SpecSD    model
+#8 0.9931318 0.9753754 0.9328947 0.008100897 0.01569929 0.0653288 glmboost
 ```
 We've loaded the results from the caret train objects on our local machine, and combined them in one data.frame so that we can directly compare the accuracy of different models.
 As mentioned in the previous step, we need to specify the name of the dataset, as this allows us to load the correct .Rda files; the name passed to `compare` must be identical to the name we used in the `launcher` function.
@@ -169,8 +180,7 @@ library(ensembler)
 
 blender_fact <-  function(ensemble){
   function(Cl.thickness, Cell.size, Cell.shape, Marg.adhesion, Epith.c.size, Bare.nuclei, Bl.cromatin, Normal.nucleoli, Mitoses){
-  df <- data.frame(Cl.thickness = Cl.thickness, Cell.size = Cell.size, Cell.shape = Cell.shape, Marg.adhesion = Marg.adhesion, Epith.c.size = Epith.c.size, 
-                    Bare.nuclei = Bar.nuclei, Bl.cromatin =Bl.cromatin, Normal.nucleoli =Normal.nucleoli, Mitoses = Mitoses)
+  df <- data.frame(Cl.thickness = Cl.thickness, Cell.size = Cell.size, Cell.shape = Cell.shape, Marg.adhesion = Marg.adhesion, Epith.c.size = Epith.c.size, Bare.nuclei = Bar.nuclei, Bl.cromatin = Bl.cromatin, Normal.nucleoli = Normal.nucleoli, Mitoses = Mitoses)
   df <- data.frame(lapply(df, as.factor))
   df[2, ] <- df[1, ]#hideous hack for bug on single row df in predict.caretEnsemble
   ens_preds <- predict(ensemble, newdata=df)

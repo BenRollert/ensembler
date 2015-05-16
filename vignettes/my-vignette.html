@@ -65,7 +65,7 @@ testing &lt;- BreastCancer[-inTrain, ]
 
 
 save(training, testing, file=&quot;BreastCancer.Rda&quot;)</code></pre>
-<p>Our datasets will be pushed to Domino’s remote server as soon as we launch a run.</p>
+<p>We name our .Rda file “BreastCancer.Rda”. We could use a more sophisticated naming convention for the dataset, or any name we want for that matter. The important thing is to remember the name as we will need to reference the name of the .Rda file in the future. Our datasets will be pushed to Domino’s remote server as soon as we launch a run.</p>
 </div>
 <div id="create-a-script-to-train-caret-methods." class="section level2">
 <h2>Create a script to train caret methods.</h2>
@@ -123,7 +123,7 @@ dataset &lt;- &quot;BreastCancer&quot;
 models_breast &lt;- c(&quot;nnet&quot;, &quot;rf&quot;, &quot;svmLinear&quot;, &quot;svmRadial&quot;, &quot;svmPoly&quot;, &quot;gbm&quot;, &quot;glm&quot;, &quot;glmboost&quot;)
 
 launcher(script = &quot;variable_model.R&quot;, dataset=dataset, par=models_breast)</code></pre>
-<p>Notice that we pass the name of the dataset as a variable. This is so that we tag our .Rda files with a name we can use to load the files in the future. We could use a more sophisticated name convention for the dataset, or any name want for that matter. The only key is to keep track of the name we use so that we are able to load the results of our model training in the next step.</p>
+<p>Notice that we pass the name of the dataset as a variable. This is so that we load the appropriate .Rda file with dataset we wish to train on.</p>
 </div>
 <div id="downloading-and-combining-results-from-domino-runs" class="section level2">
 <h2>Downloading and combining results from Domino runs</h2>

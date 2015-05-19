@@ -110,7 +110,7 @@ predict.ensemble <- function(model_list, newdata, type, outcome){
   }
   
   
-  predict_filt <- pred_fact(newdata=newdata, type = "prob", outcome=2)
+  predict_filt <- pred_fact(newdata=newdata, type = "prob", outcome=outcome)
   out <- sapply(model_list, predict_filt)
   if(class(out)=="numeric"){
     names(out) <- sapply(model_list, function(x) x$method)}else

@@ -72,7 +72,9 @@ registerDoParallel(detectCores())
 dataset <- commandArgs(trailingOnly = TRUE)[1]
 load(paste0(dataset,".Rda"))
 
-method <- commandArgs(trailingOnly = TRUE)[2]
+formula <- as.formula(commandArgs(trailingOnly = TRUE)[2])
+
+method <- commandArgs(trailingOnly = TRUE)[3]
 
 n_samples <- 10
 set.seed(12)
@@ -87,7 +89,7 @@ trCtrl <- trainControl(method = "cv",
                        savePredictions=TRUE,
                        index = folds)
 
-model <- train(Class~., 
+model <- train(formula, 
                data = training,
                metric="ROC",
                method = method,
@@ -105,7 +107,7 @@ save(model, file = sprintf("model_obj_%s_%s.Rda", dataset, method))#save object 
 After having saved the above script as `variable_model.R` in our working directory, we are ready to launch some runs.
 
 ##Launch runs to train multiple caret methods on the same dataset, in parallel
-We now decide on a set of caret methods we wish to train on our training data. Then we launch runs on domino by programmatically passing our caret methods as arguments to the script `variable_model.R`
+We now decide on a set of caret methods we wish to train on our training data. We also decide on the formula to pass to caret train; in this case we want to train on all features in the training data. Then we launch runs on domino by programmatically passing our caret methods as arguments to the script `variable_model.R`
 
 ```
 library(ensembler)
@@ -115,7 +117,7 @@ dataset <- "BreastCancer"
 #vector specifying different caret methods
 models_breast <- c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost")
 
-launcher(script = "variable_model.R", dataset=dataset, par=models_breast)
+launcher(script = "variable_model.R", dataset=dataset, par=models_breast, formula = "Class~.")
 ```
 Notice that we pass the name of the dataset as a variable. This is so that we load the appropriate .Rda file with dataset we wish to train on.
 

@@ -19,13 +19,14 @@ results
 #' @param script A character string specifying the name of the script you wish to run.
 #' @param dataset A character string specifying the name of the dataset you are training the models on.
 #' @param par Character string vector specifying the parameters of interest. Examples of parameters include different values of hyperparameters or different caret methods.
+#' @param formula A character string specifying the formula to pass to caret train.
 #' @return Response from Domino indicating if runs are succesfully triggered. 
 #' @examples
 #' models <- c("nnet", "rf", "gbm")
 #' launcher(script = "variable_model.R", dataset = "BreastCancer", par = models)
 #' @export
-launcher <- function(script, dataset, par){
-  lapply(par, function(m) domino.run(script, dataset, m))
+launcher <- function(script, dataset, par, formula){
+  lapply(par, function(m) domino.run(script, dataset, formula, m))
 }
 
 #' Compare results from caret models trained on multiple instances on Domino.

@@ -4,7 +4,7 @@
 \alias{launcher}
 \title{Programmatically pass arguments to a script for training caret models.}
 \usage{
-launcher(script, dataset, par)
+launcher(script, dataset, par, formula)
 }
 \arguments{
 \item{script}{A character string specifying the name of the script you wish to run.}
@@ -12,6 +12,8 @@ launcher(script, dataset, par)
 \item{dataset}{A character string specifying the name of the dataset you are training the models on.}
 
 \item{par}{Character string vector specifying the parameters of interest. Examples of parameters include different values of hyperparameters or different caret methods.}
+
+\item{formula}{A character string specifying the formula to pass to caret train.}
 }
 \value{
 Response from Domino indicating if runs are succesfully triggered.

@@ -169,10 +169,10 @@ greedy_ensemble <- caretEnsemble(model_list)#greedy forward selection
 ens_preds <- predict(greedy_ensemble, newdata=testing)
 
 
-#reference vector
+#reference vector for cross-validation
 reference <- ifelse(testing$Class == label, 1, 0)
 aucFun(ens_preds, reference)
-#0.985348
+#0.985348 Area under the ROC curve on test data
 ```
 
 Once we have created a `caretList` object we can use any of the methods from the `caretEnsemble` package, including `caretStack`. To learn more about the `caretEnsemble` package,

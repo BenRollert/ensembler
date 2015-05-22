@@ -132,6 +132,7 @@ domino.download()#downloads .Rda files into our working directory
 
 dataset <- "BreastCancer"
 label <- "malignant"
+load(paste0(dataset, ".Rda"))#load training and test data
 
 #compare accuracy of models
 models_breast <- c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost") #name of methods we launched in previous step
@@ -166,6 +167,10 @@ greedy_ensemble <- caretEnsemble(model_list)#greedy forward selection
 
 #use optimal blend as an ensemble, predict on test data
 ens_preds <- predict(greedy_ensemble, newdata=testing)
+
+
+#reference vector
+reference <- ifelse(testing$Class == label, 1, 0)
 aucFun(ens_preds, reference)
 #0.985348
 ```

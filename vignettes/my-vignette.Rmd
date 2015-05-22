@@ -43,15 +43,15 @@ library(randomForest)
 data(BreastCancer)
 
 BreastCancer <- BreastCancer[ ,-1]
-BreastCancer <- rfImpute(data=BreastCancer, y=BreastCancer$Class, x=BreastCancer[ ,1:9])
+BreastCancer <- rfImpute(data = BreastCancer, y = BreastCancer$Class, x = BreastCancer[ ,1:9])
 colnames(BreastCancer)[1] <- c("Class")
 
-inTrain <- createDataPartition(y= BreastCancer$Class, p=.8, list=FALSE)
+inTrain <- createDataPartition(y = BreastCancer$Class, p = .8, list = FALSE)
 training <- BreastCancer[inTrain, ]
 testing <- BreastCancer[-inTrain, ]
 
 
-save(training, testing, file="BreastCancer.Rda")
+save(training, testing, file = "BreastCancer.Rda")
 ```
 We name our .Rda file "BreastCancer.Rda". We could use a more sophisticated naming convention for the dataset, or any name we want for that matter. The important thing is to remember the name as we will need to reference the name of the .Rda file in the future.
 Our datasets will be pushed to Domino's remote server as soon as we launch a run. 
@@ -83,7 +83,7 @@ folds <- createFolds(training$Class, n_samples, returnTrain = TRUE)
 
 trCtrl <- trainControl(method = "cv", 
                        number = n_samples, 
-                       summaryFunction=twoClassSummary,
+                       summaryFunction = twoClassSummary,
                        allowParallel = TRUE,
                        classProbs =  TRUE,
                        savePredictions=TRUE,
@@ -91,7 +91,7 @@ trCtrl <- trainControl(method = "cv",
 
 model <- train(formula, 
                data = training,
-               metric="ROC",
+               metric ="ROC",
                method = method,
                trControl = trCtrl)
 
@@ -117,7 +117,10 @@ dataset <- "BreastCancer"
 #vector specifying different caret methods
 models_breast <- c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost")
 
-launcher(script = "variable_model.R", dataset=dataset, par=models_breast, formula = "Class~.")
+launcher(script = "variable_model.R", 
+        dataset = dataset, 
+        par = models_breast, 
+        formula = "Class~.")
 ```
 Notice that we pass the name of the dataset as a variable. This is so that we load the appropriate .Rda file with dataset we wish to train on.
 
@@ -136,7 +139,7 @@ load(paste0(dataset, ".Rda"))#load training and test data
 
 #compare accuracy of models
 models_breast <- c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost") #name of methods we launched in previous step
-ordered_acc <- compare(models_breast, dataset=dataset, metric="ROC")
+ordered_acc <- compare(models_breast, dataset = dataset, metric = "ROC")
 print(ordered_acc)
 #ROC      Sens      Spec       ROCSD     SensSD     SpecSD     model
 #8  0.9931318 0.9753754 0.9328947 0.008100897 0.01569929 0.06532880  glmboost
@@ -159,14 +162,14 @@ We're finally ready to build an ensemble from the models we trained on Domino. `
 `caretEnsemble` package.
 
 ```
-model_list <- load_caret_list(dataset="BreastCancer", models=models)
+model_list <- load_caret_list(dataset = "BreastCancer", models = models)
 greedy_ensemble <- caretEnsemble(model_list)#greedy forward selection
 #$weights
 #nnet   rf 
 #0.64 0.36 
 
 #use optimal blend as an ensemble, predict on test data
-ens_preds <- predict(greedy_ensemble, newdata=testing)
+ens_preds <- predict(greedy_ensemble, newdata = testing)
 
 
 #reference vector for cross-validation
@@ -191,15 +194,15 @@ blender_fact <-  function(ensemble){
   df <- data.frame(Cl.thickness = Cl.thickness, Cell.size = Cell.size, Cell.shape = Cell.shape, Marg.adhesion = Marg.adhesion, Epith.c.size = Epith.c.size, Bare.nuclei = Bar.nuclei, Bl.cromatin = Bl.cromatin, Normal.nucleoli = Normal.nucleoli, Mitoses = Mitoses)
   df <- data.frame(lapply(df, as.factor))
   df[2, ] <- df[1, ]#hideous hack for bug on single row df in predict.caretEnsemble
-  ens_preds <- predict(ensemble, newdata=df)
+  ens_preds <- predict(ensemble, newdata = df)
   ens_preds[1]
   }
 }
 
-model_list <- load_caret_list(dataset="BreastCancer", models=c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost"))
+model_list <- load_caret_list(dataset = "BreastCancer", models = c("nnet", "rf", "svmLinear", "svmRadial", "svmPoly", "gbm", "glm", "glmboost"))
 greedy_ensemble <- caretEnsemble::caretEnsemble(model_list)
 
-APIFunc <- blender_fact(ensemble=greedy_ensemble)
+APIFunc <- blender_fact(ensemble = greedy_ensemble)
 ```
 
 In Domino, we publish the endpoint by speciying the script name `Cancer_API.R` and the function to invoke `APIFunc`. 
